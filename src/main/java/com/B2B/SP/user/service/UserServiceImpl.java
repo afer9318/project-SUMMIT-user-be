@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,7 +56,7 @@ public class UserServiceImpl implements UserService{
             logger.info("Finding user by id: {}", userId);
 
             User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new UserNotFoundException("User not found with id" + userId));
+                    .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
 
             return UserMapper.INSTANCE.userToDto(user);
         }catch (Exception e){
@@ -85,5 +86,33 @@ public class UserServiceImpl implements UserService{
             logger.error("Exception while saving user", e);
             throw e;
         }
+    }
+
+    @Override
+    @Transactional
+    public UserDto update(UserDto userDto) {
+        Long userId = userDto.getUserId();
+
+        if (userId == null){
+            logger.error("Cannot update user without id");
+            throw new BadRequestException("Cannot update user without id");
+        }
+
+        if (userDto.getAccountStatus() == User.AccountStatus.INACTIVE){
+            throw new BadRequestException("Cannot update user account status as INACTIVE");
+        }
+
+        logger.info("Updating user: {}", userDto);
+
+        User user = userRepository.findByIdAccountNotInActive(userId);
+
+        if (user == null){
+            logger.error("Cannot update deleted user");
+            throw new BadRequestException("Cannot update deleted user");
+        }
+
+        User updatedUser = UserMapper.INSTANCE.dtoToUser(userDto);
+        updatedUser = userRepository.save(updatedUser);
+        return UserMapper.INSTANCE.userToDto(updatedUser);
     }
 }

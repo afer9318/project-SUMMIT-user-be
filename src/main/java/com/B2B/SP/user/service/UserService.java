@@ -12,4 +12,6 @@ public interface UserService {
     UserDto findById(Long userId);
 
     UserDto save(UserDto userDto);
+
+    UserDto update(UserDto userDto);
 }
