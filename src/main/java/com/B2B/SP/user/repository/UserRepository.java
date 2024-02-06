@@ -10,8 +10,13 @@ import java.util.List;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    @Query("SELECT u FROM User u WHERE u.accountStatus != :accountStatus")
-    List<User> findAllByAccountStatusNot(User.AccountStatus accountStatus);
+
+    // Custom Query to filter by account status
+//    @Query("SELECT u FROM User u WHERE u.accountStatus != :accountStatus")
+//    List<User> findAllByAccountStatusNot(User.AccountStatus accountStatus);
+
+    @Query("SELECT u FROM User u WHERE u.accountStatus != 'INACTIVE'")
+    List<User> findAllByAccountNotInActive();
 
     @Query("SELECT u from User u WHERE u.userId = :userId AND u.accountStatus != 'INACTIVE'")
     User findByIdAccountNotInActive(@Param("userId") Long userId);

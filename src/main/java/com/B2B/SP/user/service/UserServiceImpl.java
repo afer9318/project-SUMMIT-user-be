@@ -39,10 +39,11 @@ public class UserServiceImpl implements UserService{
         try {
             logger.info("Finding all users");
 
-            return userRepository.findAllByAccountStatusNot(User.AccountStatus.INACTIVE)
+            return userRepository.findAllByAccountNotInActive()
                     .stream()
                     .map(UserMapper.INSTANCE::userToDto)
                     .collect(Collectors.toList());
+
         }catch (Exception e){
             logger.error("Exception while finding all users", e);
             throw e;
