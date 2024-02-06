@@ -39,10 +39,11 @@ public class UserServiceImpl implements UserService{
         try {
             logger.info("Finding all users");
 
-            return userRepository.findAllByAccountStatusNot(User.AccountStatus.INACTIVE)
+            return userRepository.findAllByAccountNotInActive()
                     .stream()
                     .map(UserMapper.INSTANCE::userToDto)
                     .collect(Collectors.toList());
+
         }catch (Exception e){
             logger.error("Exception while finding all users", e);
             throw e;
@@ -104,9 +105,9 @@ public class UserServiceImpl implements UserService{
 
         logger.info("Updating user: {}", userDto);
 
-        User user = userRepository.findByIdAccountNotInActive(userId);
+        Optional<User> optionalUser = userRepository.findByIdAccountNotInActive(userId);
 
-        if (user == null){
+        if (optionalUser.isEmpty()){
             logger.error("Cannot update deleted user");
             throw new BadRequestException("Cannot update deleted user");
         }
@@ -114,5 +115,24 @@ public class UserServiceImpl implements UserService{
         User updatedUser = UserMapper.INSTANCE.dtoToUser(userDto);
         updatedUser = userRepository.save(updatedUser);
         return UserMapper.INSTANCE.userToDto(updatedUser);
+    }
+
+    @Override
+    public void deleteById(Long userId) {
+        try{
+            logger.info("Deleting user: {}", userId);
+
+            Optional<User> optionalUser = userRepository.findByIdAccountNotInActive(userId);
+
+            if (optionalUser.isEmpty()){
+                logger.error("User already deleted");
+                throw new UserNotFoundException("User already deleted");
+            }
+
+            userRepository.deleteById(userId);
+        }catch (Exception e){
+            logger.error("Exception while deleting user", e);
+            throw e;
+        }
     }
 }
