@@ -3,12 +3,11 @@ package com.B2B.SP.user.controller;
 import com.B2B.SP.user.dto.UserDto;
 import com.B2B.SP.user.model.User;
 import com.B2B.SP.user.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -32,6 +31,12 @@ public class UserController {
     public ResponseEntity<UserDto> getUser(@PathVariable Long userId){
         UserDto userDto = userService.findById(userId);
         return ResponseEntity.ok(userDto);
+    }
+
+    @PostMapping("/")
+    public ResponseEntity<UserDto> saveUser(@Validated @RequestBody UserDto userDto){
+        UserDto savedUserDto = userService.save(userDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedUserDto);
     }
 }
 

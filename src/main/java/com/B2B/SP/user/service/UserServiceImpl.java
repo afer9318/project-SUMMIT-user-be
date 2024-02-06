@@ -1,6 +1,7 @@
 package com.B2B.SP.user.service;
 
 import com.B2B.SP.user.dto.UserDto;
+import com.B2B.SP.user.exceptions.customexceptions.BadRequestException;
 import com.B2B.SP.user.exceptions.customexceptions.UserNotFoundException;
 import com.B2B.SP.user.mapper.UserMapper;
 import com.B2B.SP.user.model.User;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,6 +60,29 @@ public class UserServiceImpl implements UserService{
             return UserMapper.INSTANCE.userToDto(user);
         }catch (Exception e){
             logger.error("Exception while finding user by id: {}", userId, e);
+            throw e;
+        }
+    }
+
+    @Override
+    @Transactional
+    public UserDto save(UserDto userDto) {
+        try{
+            if (Objects.nonNull(userDto.getUserId())) {
+                throw new BadRequestException("Saving user does not need an ID");
+            }
+
+            if(userDto.getAccountStatus() == User.AccountStatus.INACTIVE){
+                throw new BadRequestException("User account status cannot be INACTIVE");
+            }
+
+            logger.info("Saving user: {}", userDto);
+            User user = UserMapper.INSTANCE.dtoToUserSave(userDto);
+            User savedUser = userRepository.save(user);
+
+            return UserMapper.INSTANCE.userToDto(savedUser);
+        }catch (Exception e){
+            logger.error("Exception while saving user", e);
             throw e;
         }
     }

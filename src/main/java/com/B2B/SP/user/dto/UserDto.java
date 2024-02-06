@@ -1,6 +1,7 @@
 package com.B2B.SP.user.dto;
 
 import com.B2B.SP.user.model.User;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,10 +23,10 @@ public class UserDto {
     private String userEmail;
 
     @NotNull(message = "Account type cannot be null")
-    @Pattern(regexp = "^(CUSTOMER|SUPPLIER|ADMIN)$", message = "Invalid account type")
+    @Enumerated
     private User.AccountType accountType;
 
     @NotNull(message = "Account status cannot be null")
-    @Pattern(regexp = "^(ACTIVE|INACTIVE|SUSPENDED)$", message = "Invalid account status")
+    @Enumerated
     private User.AccountStatus accountStatus;
 }
