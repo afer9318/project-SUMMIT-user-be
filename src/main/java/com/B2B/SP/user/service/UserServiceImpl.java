@@ -1,6 +1,7 @@
 package com.B2B.SP.user.service;
 
 import com.B2B.SP.user.dto.UserDto;
+import com.B2B.SP.user.exceptions.customexceptions.BadRequestException;
 import com.B2B.SP.user.exceptions.customexceptions.UserNotFoundException;
 import com.B2B.SP.user.mapper.UserMapper;
 import com.B2B.SP.user.model.User;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,12 +56,63 @@ public class UserServiceImpl implements UserService{
             logger.info("Finding user by id: {}", userId);
 
             User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new UserNotFoundException("User not found with id" + userId));
+                    .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
 
             return UserMapper.INSTANCE.userToDto(user);
         }catch (Exception e){
             logger.error("Exception while finding user by id: {}", userId, e);
             throw e;
         }
+    }
+
+    @Override
+    @Transactional
+    public UserDto save(UserDto userDto) {
+        try{
+            if (Objects.nonNull(userDto.getUserId())) {
+                throw new BadRequestException("Saving user does not need an ID");
+            }
+
+            if(userDto.getAccountStatus() == User.AccountStatus.INACTIVE){
+                throw new BadRequestException("User account status cannot be INACTIVE");
+            }
+
+            logger.info("Saving user: {}", userDto);
+            User user = UserMapper.INSTANCE.dtoToUserSave(userDto);
+            User savedUser = userRepository.save(user);
+
+            return UserMapper.INSTANCE.userToDto(savedUser);
+        }catch (Exception e){
+            logger.error("Exception while saving user", e);
+            throw e;
+        }
+    }
+
+    @Override
+    @Transactional
+    public UserDto update(UserDto userDto) {
+        Long userId = userDto.getUserId();
+
+        if (userId == null){
+            logger.error("Cannot update user without id");
+            throw new BadRequestException("Cannot update user without id");
+        }
+
+        if (userDto.getAccountStatus() == User.AccountStatus.INACTIVE){
+            throw new BadRequestException("Cannot update user account status as INACTIVE");
+        }
+
+        logger.info("Updating user: {}", userDto);
+
+        User user = userRepository.findByIdAccountNotInActive(userId);
+
+        if (user == null){
+            logger.error("Cannot update deleted user");
+            throw new BadRequestException("Cannot update deleted user");
+        }
+
+        User updatedUser = UserMapper.INSTANCE.dtoToUser(userDto);
+        updatedUser = userRepository.save(updatedUser);
+        return UserMapper.INSTANCE.userToDto(updatedUser);
     }
 }

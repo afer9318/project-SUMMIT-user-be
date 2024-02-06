@@ -18,5 +18,5 @@ public interface UserMapper {
     User dtoToUser(UserDto userDto);
 
     @Mapping(target = "userId", ignore = true)
-    User dtoToProductSave(UserDto userDto);
+    User dtoToUserSave(UserDto userDto);
 }
