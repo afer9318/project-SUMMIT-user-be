@@ -7,12 +7,14 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.ParamDef;
+import org.hibernate.annotations.SQLDelete;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "user_table")
+@SQLDelete(sql = "UPDATE user_table SET account_status = 'INACTIVE' WHERE user_Id=?")
 public class User {
 
     public enum AccountType {

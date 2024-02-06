@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -18,6 +19,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.accountStatus != 'INACTIVE'")
     List<User> findAllByAccountNotInActive();
 
+//    @Query("SELECT u from User u WHERE u.userId = :userId AND u.accountStatus != 'INACTIVE'")
+//    User findByIdAccountNotInActive(@Param("userId") Long userId);
+
     @Query("SELECT u from User u WHERE u.userId = :userId AND u.accountStatus != 'INACTIVE'")
-    User findByIdAccountNotInActive(@Param("userId") Long userId);
+    Optional<User> findByIdAccountNotInActive(@Param("userId") Long userId);
 }
